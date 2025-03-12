@@ -1,1 +1,2 @@
 elasticsearch-sidecar/7.17.24/modules/ingest-geoip/GeoLite2-City.mmdb filter=lfs diff=lfs merge=lfs -text
+liferay.tar.gz filter=lfs diff=lfs merge=lfs -text
