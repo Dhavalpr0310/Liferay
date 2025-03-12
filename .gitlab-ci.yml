@@ -1,0 +1,53 @@
+stages:
+  - build
+  - push
+  - deploy
+
+variables:
+  IMAGE_NAME: your-dockerhub-username/liferay-custom
+  K8S_NAMESPACE: liferay
+  K8S_DEPLOYMENT_NAME: liferay-deployment
+  K8S_SERVICE_NAME: liferay-service
+  KUBE_CONFIG: $KUBE_CONFIG
+
+before_script:
+  - echo "Starting CI/CD pipeline for Liferay"
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $IMAGE_NAME:latest .
+    - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker images
+  only:
+    - main
+
+push:
+  stage: push
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+    - docker push $IMAGE_NAME:latest
+    - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
+    - export KUBECONFIG=kubeconfig.yaml
+    - kubectl config use-context your-k8s-cluster
+    - kubectl create namespace $K8S_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+    - helm upgrade --install mywebapp-release ./webapp1/ --namespace $K8S_NAMESPACE
+    - kubectl get pods -n $K8S_NAMESPACE
+    - kubectl get svc -n $K8S_NAMESPACE
+  only:
+    - main
+

@@ -1,0 +1,40 @@
+apiVersion: v2
+name: liferay-chart
+description: A Helm chart for Liferay deployment
+version: 0.1.0
+
+# values.yaml
+replicaCount: 1
+
+image:
+  repository: dhavalpr0310/liferay-custom
+  tag: latest
+
+service:
+  name: liferay-service
+  type: NodePort
+  port: 80
+  targetPort: 8080
+  nodePort: 31007
+
+persistence:
+  enabled: true
+  storageClass: manual
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+  hostPath: "/mnt/data/liferay-db"
+
+deployment:
+  containerPort: 8080
+  volumeMountPath: /opt/liferay/data
+
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+    cpu: "1"
+

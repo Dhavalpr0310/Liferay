@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liferay-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liferay
+  template:
+    metadata:
+      labels:
+        app: liferay
+    spec:
+      containers:
+        - name: liferay
+          image: dhavalpr0310/liferay:v1    # Replace with your image
+          ports:
+            - containerPort: 8080
+          env:
+            - name: LIFERAY_JAVA_OPTS
+              value: "-Xms512m -Xmx2g"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: liferay-service
+spec:
+  selector:
+    app: liferay
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer  # Change to NodePort if not using a cloud provider
+

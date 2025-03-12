@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liferay
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: liferay
+          image: dhavalpr0310/liferay-custom:latest
+          ports:
+            - containerPort: 8080 
+          volumeMounts:
+            - name: liferay-storage
+              mountPath: /opt/liferay/data  # ✅ Fixed this
+      volumes:
+        - name: liferay-storage
+          persistentVolumeClaim:
+            claimName: liferay-pvc
